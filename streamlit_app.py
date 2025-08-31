@@ -24,25 +24,60 @@ st.markdown("""
 }
 .block-container .stTextInput > div > div{ border-radius: 999px !important; }
 
-.grid{ display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; margin-top: 10px; }
-.card{ position: relative; overflow: hidden; padding: 22px 22px 18px 22px; border-radius: 20px;
+.card{ 
+  position: relative; overflow: hidden; padding: 22px 22px 18px 22px; border-radius: 20px;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18);
   box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
-.card:hover{ transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,0.45); border-color: rgba(255,255,255,0.28); }
-.card .accent{ position: absolute; left: 0; top: 0; bottom: 0; width: 10px; background: linear-gradient(180deg,#818cf8,#22d3ee); }
-.icon{ width:84px;height:84px;border-radius:50%; display:grid; place-items:center;
-  background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.20); font-size:36px; margin-bottom:10px; }
-.card h3{ margin:6px 0 4px 0; font-size:1.25rem; color:#fff; }
-.card p{ margin:0; color:#CBD5E1; line-height:1.35; }
-.actions{ display:flex; gap:12px; align-items:center; margin-top:14px; }
-.btn{ padding:10px 18px; border-radius:12px; background:rgba(255,255,255,0.10);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; 
+  margin-bottom: 28px;
+  height: 280px;
+}
+.card:hover{ 
+  transform: translateY(-2px); 
+  box-shadow: 0 16px 40px rgba(0,0,0,0.45); 
+  border-color: rgba(255,255,255,0.28); 
+}
+.card .accent{ 
+  position: absolute; left: 0; top: 0; bottom: 0; width: 10px; 
+}
+.icon{ 
+  width:84px; height:84px; border-radius:50%; display:grid; place-items:center;
+  background: rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.20); 
+  font-size:36px; margin-bottom:10px; 
+}
+.card h3{ 
+  margin:6px 0 4px 0; font-size:1.25rem; color:#fff; 
+}
+.card p{ 
+  margin:0 0 14px 0; color:#CBD5E1; line-height:1.35; 
+}
+.actions{ 
+  display:flex; gap:12px; align-items:center; margin-top:14px; 
+}
+.btn{ 
+  padding:10px 18px; border-radius:12px; background:rgba(255,255,255,0.10);
   border:1px solid rgba(255,255,255,0.22); color:#fff; text-decoration:none; font-weight:600;
-  transition: background .15s ease, border-color .15s ease, transform .15s ease; }
-.btn:hover{ background:rgba(255,255,255,0.16); border-color:rgba(255,255,255,0.32); transform: translateY(-1px); }
-.src{ color:#93C5FD; opacity:.9; text-decoration:none; }
-.src:hover{ text-decoration:underline; opacity:1; }
-h1,h2{ color:#fff; } .subtitle{ color:#CBD5E1; margin-top:-6px; }
+  transition: background .15s ease, border-color .15s ease, transform .15s ease; 
+}
+.btn:hover{ 
+  background:rgba(255,255,255,0.16); 
+  border-color:rgba(255,255,255,0.32); 
+  transform: translateY(-1px); 
+}
+.src{ 
+  color:#93C5FD; opacity:.9; text-decoration:none; 
+}
+.src:hover{ 
+  text-decoration:underline; opacity:1; 
+}
+h1,h2{ color:#fff; } 
+.subtitle{ color:#CBD5E1; margin-top:-6px; }
+
+/* Remove padding das colunas do Streamlit */
+.stColumn > div {
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -90,23 +125,27 @@ st.markdown('<p class="subtitle">Rápido, organizado e bonito — clique e abra 
 q = st.text_input("Buscar", placeholder="Buscar aplicativos…", label_visibility="collapsed").strip().lower()
 apps = [a for a in APPS if q in a["name"].lower() or q in a["desc"].lower()] if q else APPS
 
-# ---------- HTML DOS CARDS ----------
-def card_html(a):
-    # cada card é um bloco HTML completo e bem-formado
-    return f"""
-    <div class="card">
-      <div class="accent" style="background:{a['accent']};"></div>
-      <div class="icon">{a['emoji']}</div>
-      <h3>{a['name']}</h3>
-      <p>{a['desc']}</p>
-      <div class="actions">
-        <a class="btn" href="{a['url']}" target="_blank" rel="noopener">Abrir →</a>
-        <a class="src" href="{a['github']}" target="_blank" rel="noopener">Código-fonte</a>
-      </div>
-    </div>
-    """
-
-html = '<div class="grid">' + "".join(card_html(a) for a in apps) + '</div>'
-st.markdown(html, unsafe_allow_html=True)  # <— importante: unsafe_allow_html=True
+# ---------- RENDERIZAÇÃO COM COLUNAS ----------
+if apps:
+    # Criar 2 colunas para layout responsivo
+    cols = st.columns(2)
+    
+    for i, app in enumerate(apps):
+        with cols[i % 2]:  # Alterna entre coluna 0 e 1
+            st.markdown(f"""
+            <div class="card">
+              <div class="accent" style="background:{app['accent']};"></div>
+              <div class="icon">{app['emoji']}</div>
+              <h3>{app['name']}</h3>
+              <p>{app['desc']}</p>
+              <div class="actions">
+                <a class="btn" href="{app['url']}" target="_blank" rel="noopener">Abrir →</a>
+                <a class="src" href="{app['github']}" target="_blank" rel="noopener">Código-fonte</a>
+              </div>
+            </div>
+            """, unsafe_allow_html=True)
+else:
+    st.markdown("### Nenhum aplicativo encontrado")
+    st.markdown("Tente buscar por outro termo.")
 
 
